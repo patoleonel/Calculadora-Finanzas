@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="header-section">
-    <h1>Your Goals</h1>
-    <p>Track your progress towards financial freedom.</p>
+    <h1>Tus Metas</h1>
+    <p>Sigue tu progreso hacia la libertad financiera.</p>
 </div>
 
 <div class="goals-grid">
@@ -11,7 +11,9 @@
     <div class="goal-card">
         <div class="goal-header">
             <h3>{{ goal.name }}</h3>
-            <span class="badge {{ goal.goal_type }}">{{ goal.goal_type.replace('_', ' ').title() }}</span>
+            <span class="badge {{ goal.goal_type }}">
+                {% if goal.goal_type == 'time_based' %}Basado en Tiempo{% else %}Basado en Contribución{% endif %}
+            </span>
         </div>
         <div class="goal-body">
             <div class="progress-bar">
@@ -25,26 +27,26 @@
                 {% endif %}
             </div>
             <div class="amounts">
-                <span>${{ "{:,.2f}".format(goal.current_amount) }}</span>
-                <span>of ${{ "{:,.2f}".format(goal.target_amount) }}</span>
+                <span>U$D {{ "{:,.2f}".format(goal.current_amount) }}</span>
+                <span>de U$D {{ "{:,.2f}".format(goal.target_amount) }}</span>
             </div>
             <div class="details">
                 {% if goal.goal_type == 'time_based' %}
-                <p>Target Date: {{ goal.target_date }}</p>
-                <p class="highlight">Monthly Contribution: ${{ "{:,.2f}".format(goal.monthly_contribution if
+                <p>Fecha Objetivo: {{ goal.target_date }}</p>
+                <p class="highlight">Contribución Mensual: U$D {{ "{:,.2f}".format(goal.monthly_contribution if
                     goal.monthly_contribution else 0) }}</p>
                 {% else %}
-                <p>Monthly Contribution: ${{ "{:,.2f}".format(goal.monthly_contribution if goal.monthly_contribution
+                <p>Contribución Mensual: U$D {{ "{:,.2f}".format(goal.monthly_contribution if goal.monthly_contribution
                     else 0) }}</p>
-                <p class="highlight">Estimated Completion: {{ goal.target_date }}</p>
+                <p class="highlight">Finalización Estimada: {{ goal.target_date }}</p>
                 {% endif %}
             </div>
         </div>
     </div>
     {% else %}
     <div class="empty-state">
-        <p>No goals found. Start by adding one!</p>
-        <a href="{{ url_for('add_goal') }}" class="btn-secondary">Create First Goal</a>
+        <p>No se encontraron metas. ¡Comienza agregando una!</p>
+        <a href="{{ url_for('add_goal') }}" class="btn-secondary">Crear Primera Meta</a>
     </div>
     {% endfor %}
 </div>

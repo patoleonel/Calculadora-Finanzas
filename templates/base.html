@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <nav>
         <div class="container">
-            <a href="{{ url_for('index') }}" class="logo">Financial Goals</a>
+            <a href="{{ url_for('index') }}" class="logo">Metas Financieras</a>
             <div class="nav-links">
-                <a href="{{ url_for('index') }}">Dashboard</a>
-                <a href="{{ url_for('add_goal') }}" class="btn-primary">Add Goal</a>
+                <a href="{{ url_for('index') }}">Panel</a>
+                <a href="{{ url_for('add_goal') }}" class="btn-primary">Agregar Meta</a>
             </div>
         </div>
     </nav>
@@ -24,8 +26,9 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 Financial Goals App</p>
+            <p>&copy; 2023 App de Metas Financieras</p>
         </div>
     </footer>
 </body>
+
 </html>
