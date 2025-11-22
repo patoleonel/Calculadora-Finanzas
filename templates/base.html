@@ -8,6 +8,21 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="logo">Metas Financieras</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Calculadora</a>
+                <a href="{{ url_for('index') }}" class="btn-primary">Nueva Consulta</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
     </main>
 
     <footer>
@@ -15,6 +30,6 @@
             <p>&copy; 2025 App de Metas Financieras hecho por Pat y Antigravity</p>
         </div>
     </footer>
-    </body>
+</body>
 
 </html>
