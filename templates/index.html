@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="header-section">
+    <h1>Your Goals</h1>
+    <p>Track your progress towards financial freedom.</p>
+</div>
+
+<div class="goals-grid">
+    {% for goal in goals %}
+    <div class="goal-card">
+        <div class="goal-header">
+            <h3>{{ goal.name }}</h3>
+            <span class="badge {{ goal.goal_type }}">{{ goal.goal_type.replace('_', ' ').title() }}</span>
+        </div>
+        <div class="goal-body">
+            <div class="progress-bar">
+                {% if goal.target_amount and goal.target_amount > 0 %}
+                {% set current = goal.current_amount if goal.current_amount else 0 %}
+                {% set percent = (current / goal.target_amount) * 100 %}
+                {% if percent > 100 %}{% set percent = 100 %}{% endif %}
+                <div class="progress" style="--w: {{ percent }}%; width: var(--w);"></div>
+                {% else %}
+                <div class="progress" style="width: 0%"></div>
+                {% endif %}
+            </div>
+            <div class="amounts">
+                <span>${{ "{:,.2f}".format(goal.current_amount) }}</span>
+                <span>of ${{ "{:,.2f}".format(goal.target_amount) }}</span>
+            </div>
+            <div class="details">
+                {% if goal.goal_type == 'time_based' %}
+                <p>Target Date: {{ goal.target_date }}</p>
+                <p class="highlight">Monthly Contribution: ${{ "{:,.2f}".format(goal.monthly_contribution if
+                    goal.monthly_contribution else 0) }}</p>
+                {% else %}
+                <p>Monthly Contribution: ${{ "{:,.2f}".format(goal.monthly_contribution if goal.monthly_contribution
+                    else 0) }}</p>
+                <p class="highlight">Estimated Completion: {{ goal.target_date }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No goals found. Start by adding one!</p>
+        <a href="{{ url_for('add_goal') }}" class="btn-secondary">Create First Goal</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
