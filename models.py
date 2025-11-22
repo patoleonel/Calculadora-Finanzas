@@ -10,6 +10,7 @@ class Goal(db.Model):
     current_amount = db.Column(db.Float, default=0.0)
     target_date = db.Column(db.Date, nullable=True)
     monthly_contribution = db.Column(db.Float, nullable=True)
+    interest_rate = db.Column(db.Float, default=0.0)
 
     def __repr__(self):
         return f'<Goal {self.name}>'

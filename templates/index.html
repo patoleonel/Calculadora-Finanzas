@@ -30,6 +30,13 @@
                 <span>U$D {{ "{:,.2f}".format(goal.current_amount) }}</span>
                 <span>de U$D {{ "{:,.2f}".format(goal.target_amount) }}</span>
             </div>
+            {% if goal.interest_rate and goal.interest_rate > 0 %}
+            <div class="interest-rate" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                <span style="background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">
+                    Interés: {{ goal.interest_rate }}%
+                </span>
+            </div>
+            {% endif %}
             <div class="details">
                 {% if goal.goal_type == 'time_based' %}
                 <p>Fecha Objetivo: {{ goal.target_date }}</p>
