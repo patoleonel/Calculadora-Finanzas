@@ -16,6 +16,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
+# Create tables automatically within app context
+with app.app_context():
+    db.create_all()
+
 @app.route('/')
 def index():
     goals = Goal.query.all()
@@ -70,6 +74,4 @@ def add_goal():
     return render_template('add_goal.html')
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
