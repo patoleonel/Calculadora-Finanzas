@@ -36,9 +36,29 @@ def index():
             }
 
             if goal_type == 'time_based':
-                target_date_str = request.form['target_date']
-                if target_date_str:
-                    target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+                time_input_type = request.form.get('time_input_type', 'date')
+                result['time_input_type'] = time_input_type
+                
+                target_date = None
+                
+                if time_input_type == 'date':
+                    target_date_str = request.form['target_date']
+                    if target_date_str:
+                        target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+                elif time_input_type == 'duration':
+                    try:
+                        years = int(request.form.get('duration_years') or 0)
+                        months = int(request.form.get('duration_months') or 0)
+                        result['duration_years'] = years
+                        result['duration_months'] = months
+                        
+                        if years > 0 or months > 0:
+                            today = datetime.now().date()
+                            target_date = today + dateutil.relativedelta.relativedelta(years=years, months=months)
+                    except ValueError:
+                        pass # Handle error appropriately
+                
+                if target_date:
                     result['target_date'] = target_date
                     
                     # Calculate monthly contribution
