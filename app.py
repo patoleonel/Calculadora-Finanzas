@@ -2,7 +2,8 @@ import os
 import math
 from flask import Flask, render_template, request, send_from_directory
 from datetime import datetime
-import dateutil.relativedelta
+from dateutil.relativedelta import relativedelta
+import math
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-key-please-change-in-prod')
@@ -32,7 +33,9 @@ def index():
                 'goal_type': goal_type,
                 'target_amount': target_amount,
                 'current_amount': current_amount,
-                'interest_rate': interest_rate
+                'interest_rate': interest_rate,
+                'monthly_contribution': 0, # Default value
+                'target_date': None # Default value
             }
 
             if goal_type == 'time_based':
@@ -42,7 +45,7 @@ def index():
                 target_date = None
                 
                 if time_input_type == 'date':
-                    target_date_str = request.form['target_date']
+                    target_date_str = request.form.get('target_date')
                     if target_date_str:
                         target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
                 elif time_input_type == 'duration':
@@ -54,25 +57,25 @@ def index():
                         
                         if years > 0 or months > 0:
                             today = datetime.now().date()
-                            target_date = today + dateutil.relativedelta.relativedelta(years=years, months=months)
+                            target_date = today + relativedelta(years=years, months=months)
                     except ValueError:
-                        pass # Handle error appropriately
+                        pass
                 
                 if target_date:
                     result['target_date'] = target_date
                     
                     # Calculate monthly contribution
                     today = datetime.now().date()
-                    months = (target_date.year - today.year) * 12 + (target_date.month - today.month)
+                    months_diff = (target_date.year - today.year) * 12 + (target_date.month - today.month)
                     
-                    if months > 0:
+                    if months_diff > 0:
                         if r > 0:
                             # Compound interest formula for PMT
-                            numerator = (target_amount - current_amount * math.pow(1 + r, months)) * r
-                            denominator = math.pow(1 + r, months) - 1
+                            numerator = (target_amount - current_amount * math.pow(1 + r, months_diff)) * r
+                            denominator = math.pow(1 + r, months_diff) - 1
                             monthly_contribution = numerator / denominator
                         else:
-                            monthly_contribution = (target_amount - current_amount) / months
+                            monthly_contribution = (target_amount - current_amount) / months_diff
                     else:
                         monthly_contribution = target_amount - current_amount # Due immediately
                     
@@ -94,14 +97,14 @@ def index():
                             if numerator > 0 and denominator > 0:
                                 months_needed = math.log(numerator / denominator) / math.log(1 + r)
                             else:
-                                months_needed = 0 # Should not happen with positive amounts
+                                months_needed = 0 
                         except ValueError:
                             months_needed = (target_amount - current_amount) / monthly_contribution
                     else:
                         months_needed = (target_amount - current_amount) / monthly_contribution
                     
                     today = datetime.now().date()
-                    target_date = today + dateutil.relativedelta.relativedelta(months=int(months_needed))
+                    target_date = today + relativedelta(months=int(months_needed))
                     result['target_date'] = target_date
 
         except Exception as e:
