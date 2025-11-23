@@ -13,105 +13,110 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.png', mimetype='image/png')
 
+import traceback
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    result = None
-    
-    if request.method == 'POST':
-        try:
-            name = request.form.get('name', 'Meta')
-            goal_type = request.form['goal_type']
-            target_amount = float(request.form['target_amount'])
-            current_amount = float(request.form['current_amount'])
-            interest_rate = float(request.form.get('interest_rate', 0.0))
-            
-            # Monthly interest rate
-            r = interest_rate / 100 / 12
-            
-            result = {
-                'name': name,
-                'goal_type': goal_type,
-                'target_amount': target_amount,
-                'current_amount': current_amount,
-                'interest_rate': interest_rate,
-                'monthly_contribution': 0, # Default value
-                'target_date': None # Default value
-            }
+    try:
+        result = None
+        
+        if request.method == 'POST':
+            try:
+                name = request.form.get('name', 'Meta')
+                goal_type = request.form['goal_type']
+                target_amount = float(request.form['target_amount'])
+                current_amount = float(request.form['current_amount'])
+                interest_rate = float(request.form.get('interest_rate', 0.0))
+                
+                # Monthly interest rate
+                r = interest_rate / 100 / 12
+                
+                result = {
+                    'name': name,
+                    'goal_type': goal_type,
+                    'target_amount': target_amount,
+                    'current_amount': current_amount,
+                    'interest_rate': interest_rate,
+                    'monthly_contribution': 0, # Default value
+                    'target_date': None # Default value
+                }
 
-            if goal_type == 'time_based':
-                time_input_type = request.form.get('time_input_type', 'date')
-                result['time_input_type'] = time_input_type
-                
-                target_date = None
-                
-                if time_input_type == 'date':
-                    target_date_str = request.form.get('target_date')
-                    if target_date_str:
-                        target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
-                elif time_input_type == 'duration':
-                    try:
-                        years = int(request.form.get('duration_years') or 0)
-                        months = int(request.form.get('duration_months') or 0)
-                        result['duration_years'] = years
-                        result['duration_months'] = months
-                        
-                        if years > 0 or months > 0:
-                            today = datetime.now().date()
-                            target_date = today + relativedelta(years=years, months=months)
-                    except ValueError:
-                        pass
-                
-                if target_date:
-                    result['target_date'] = target_date
+                if goal_type == 'time_based':
+                    time_input_type = request.form.get('time_input_type', 'date')
+                    result['time_input_type'] = time_input_type
                     
-                    # Calculate monthly contribution
-                    today = datetime.now().date()
-                    months_diff = (target_date.year - today.year) * 12 + (target_date.month - today.month)
+                    target_date = None
                     
-                    if months_diff > 0:
-                        if r > 0:
-                            # Compound interest formula for PMT
-                            numerator = (target_amount - current_amount * math.pow(1 + r, months_diff)) * r
-                            denominator = math.pow(1 + r, months_diff) - 1
-                            monthly_contribution = numerator / denominator
-                        else:
-                            monthly_contribution = (target_amount - current_amount) / months_diff
-                    else:
-                        monthly_contribution = target_amount - current_amount # Due immediately
-                    
-                    result['monthly_contribution'] = monthly_contribution
-            
-            elif goal_type == 'contribution_based':
-                monthly_contribution = float(request.form['monthly_contribution'])
-                result['monthly_contribution'] = monthly_contribution
-                
-                # Calculate target date
-                if monthly_contribution > 0:
-                    months_needed = 0
-                    if r > 0:
-                        # Compound interest formula for n
+                    if time_input_type == 'date':
+                        target_date_str = request.form.get('target_date')
+                        if target_date_str:
+                            target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+                    elif time_input_type == 'duration':
                         try:
-                            numerator = target_amount * r + monthly_contribution
-                            denominator = current_amount * r + monthly_contribution
-                            # Check for valid log input
-                            if numerator > 0 and denominator > 0:
-                                months_needed = math.log(numerator / denominator) / math.log(1 + r)
-                            else:
-                                months_needed = 0 
+                            years = int(request.form.get('duration_years') or 0)
+                            months = int(request.form.get('duration_months') or 0)
+                            result['duration_years'] = years
+                            result['duration_months'] = months
+                            
+                            if years > 0 or months > 0:
+                                today = datetime.now().date()
+                                target_date = today + relativedelta(years=years, months=months)
                         except ValueError:
-                            months_needed = (target_amount - current_amount) / monthly_contribution
-                    else:
-                        months_needed = (target_amount - current_amount) / monthly_contribution
+                            pass
                     
-                    today = datetime.now().date()
-                    target_date = today + relativedelta(months=int(months_needed))
-                    result['target_date'] = target_date
+                    if target_date:
+                        result['target_date'] = target_date
+                        
+                        # Calculate monthly contribution
+                        today = datetime.now().date()
+                        months_diff = (target_date.year - today.year) * 12 + (target_date.month - today.month)
+                        
+                        if months_diff > 0:
+                            if r > 0:
+                                # Compound interest formula for PMT
+                                numerator = (target_amount - current_amount * math.pow(1 + r, months_diff)) * r
+                                denominator = math.pow(1 + r, months_diff) - 1
+                                monthly_contribution = numerator / denominator
+                            else:
+                                monthly_contribution = (target_amount - current_amount) / months_diff
+                        else:
+                            monthly_contribution = target_amount - current_amount # Due immediately
+                        
+                        result['monthly_contribution'] = monthly_contribution
+                
+                elif goal_type == 'contribution_based':
+                    monthly_contribution = float(request.form['monthly_contribution'])
+                    result['monthly_contribution'] = monthly_contribution
+                    
+                    # Calculate target date
+                    if monthly_contribution > 0:
+                        months_needed = 0
+                        if r > 0:
+                            # Compound interest formula for n
+                            try:
+                                numerator = target_amount * r + monthly_contribution
+                                denominator = current_amount * r + monthly_contribution
+                                # Check for valid log input
+                                if numerator > 0 and denominator > 0:
+                                    months_needed = math.log(numerator / denominator) / math.log(1 + r)
+                                else:
+                                    months_needed = 0 
+                            except ValueError:
+                                months_needed = (target_amount - current_amount) / monthly_contribution
+                        else:
+                            months_needed = (target_amount - current_amount) / monthly_contribution
+                        
+                        today = datetime.now().date()
+                        target_date = today + relativedelta(months=int(months_needed))
+                        result['target_date'] = target_date
 
-        except Exception as e:
-            print(f"Error calculating goal: {e}")
-            # In a real app, you might want to flash an error message here
-    
-    return render_template('index.html', result=result)
+            except Exception as e:
+                print(f"Error calculating goal: {e}")
+                # In a real app, you might want to flash an error message here
+        
+        return render_template('index.html', result=result)
+    except Exception:
+        return f"<pre>{traceback.format_exc()}</pre>", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
