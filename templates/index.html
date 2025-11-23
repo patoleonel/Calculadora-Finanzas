@@ -35,229 +35,229 @@
         <div class="form-group">
             <label>Tipo de Meta</label>
             <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="goal_type" value="time_based" {% if not result or
-                        result.goal_type=='time_based' %}checked{% endif %} onchange="toggleFields()">
-                    <span>Basado en Tiempo (Tengo una fecha límite)</span>
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="goal_type" value="contribution_based" {% if result and
-                        value="{{ result.monthly_contribution if result and result.goal_type == 'contribution_based' else '' }}">
-            </div>
-        </div>
 
-        <button type="submit" class="btn-primary full-width">Calcular</button>
-    </form>
-</div>
+                {% if result %}
+                <div id="resultModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-button" onclick="closeModal()">&times;</span>
+                        <div class="goal-card" style="box-shadow: none;">
+                            <div class="goal-header">
+                                <h3>Resultado: {{ result.name }}</h3>
+                                <span class="badge {{ result.goal_type }}">
+                                    {% if result.goal_type == 'time_based' %}Basado en Tiempo{% else %}Basado en
+                                    Contribución{% endif %}
+                                </span>
+                            </div>
+                            <div class="goal-body">
+                                <div class="amounts">
+                                    <span>U$D {{ "{:,.2f}".format(result.current_amount) }}</span>
+                                    <span>de U$D {{ "{:,.2f}".format(result.target_amount) }}</span>
+                                </div>
 
-{% if result %}
-<div id="resultModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" onclick="closeModal()">&times;</span>
-        <div class="goal-card" style="box-shadow: none;">
-            <div class="goal-header">
-                <h3>Resultado: {{ result.name }}</h3>
-                <span class="badge {{ result.goal_type }}">
-                    {% if result.goal_type == 'time_based' %}Basado en Tiempo{% else %}Basado en Contribución{% endif %}
-                </span>
-            </div>
-            <div class="goal-body">
-                <div class="amounts">
-                    <span>U$D {{ "{:,.2f}".format(result.current_amount) }}</span>
-                    <span>de U$D {{ "{:,.2f}".format(result.target_amount) }}</span>
-                </div>
+                                {% if result.interest_rate > 0 %}
+                                <div class="interest-rate"
+                                    style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                    <span
+                                        style="background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">
+                                        Interés: {{ result.interest_rate }}%
+                                    </span>
+                                </div>
+                                {% endif %}
 
-                {% if result.interest_rate > 0 %}
-                <div class="interest-rate" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                    <span style="background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">
-                        Interés: {{ result.interest_rate }}%
-                    </span>
-                </div>
-                {% endif %}
+                                <div class="details">
+                                    {% if result.goal_type == 'time_based' %}
+                                    <p>Fecha Objetivo: {{ result.target_date }}</p>
+                                    <p class="highlight" style="font-size: 1.2rem;">Contribución Mensual Necesaria:
+                                        <br><strong>U$D {{
+                                            "{:,.2f}".format(result.monthly_contribution) }}</strong></p>
+                                    {% else %}
+                                    <p>Contribución Mensual: U$D {{ "{:,.2f}".format(result.monthly_contribution) }}</p>
+                                    <p class="highlight" style="font-size: 1.2rem;">Fecha Estimada de Finalización:
+                                        <br><strong>{{
+                                            result.target_date }}</strong></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% extends 'base.html' %}
 
-                <div class="details">
-                    {% if result.goal_type == 'time_based' %}
-                    <p>Fecha Objetivo: {{ result.target_date }}</p>
-                    <p class="highlight" style="font-size: 1.2rem;">Contribución Mensual Necesaria: <br><strong>U$D {{
-                            "{:,.2f}".format(result.monthly_contribution) }}</strong></p>
-                    {% else %}
-                    <p>Contribución Mensual: U$D {{ "{:,.2f}".format(result.monthly_contribution) }}</p>
-                    <p class="highlight" style="font-size: 1.2rem;">Fecha Estimada de Finalización: <br><strong>{{
-                            result.target_date }}</strong></p>
-                    {% endif %}
-                </div>
-            </div>
-            {% extends 'base.html' %}
-
-            {% block content %}
-            <div class="header-section">
-                <h1>Calculadora de Metas Financieras</h1>
-                <p>Calcula cuánto necesitas ahorrar o cuánto tardarás en alcanzar tus sueños.</p>
-            </div>
-
-            <div class="form-container" style="margin-bottom: 2rem;">
-                <form method="POST" id="goalForm">
-                    <div class="form-group">
-                        <label for="name">Nombre de la Meta</label>
-                        <input type="text" id="name" name="name" required placeholder="ej., Auto Nuevo, Casa Propia"
-                            value="{{ result.name if result else '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="target_amount">Monto Objetivo (U$D)</label>
-                        <input type="number" step="0.01" id="target_amount" name="target_amount" required
-                            value="{{ result.target_amount if result else '' }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="current_amount">Ahorros Actuales (U$D)</label>
-                        <input type="number" step="0.01" id="current_amount" name="current_amount"
-                            value="{{ result.current_amount if result else '0' }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="interest_rate">Tasa de Interés Anual (%)</label>
-                        <input type="number" step="0.01" id="interest_rate" name="interest_rate"
-                            value="{{ result.interest_rate if result else '0' }}" placeholder="ej. 5.0">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tipo de Meta</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="goal_type" value="time_based" {% if not result or
-                                    result.goal_type=='time_based' %}checked{% endif %} onchange="toggleFields()">
-                                <span>Basado en Tiempo (Tengo una fecha límite)</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="goal_type" value="contribution_based" {% if result and
-                                    value="{{ result.monthly_contribution if result and result.goal_type == 'contribution_based' else '' }}">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary full-width">Calcular</button>
-                </form>
-            </div>
-
-            {% if result %}
-            <div id="resultModal" class="modal">
-                <div class="modal-content">
-                    <span class="close-button" onclick="closeModal()">&times;</span>
-                    <div class="goal-card" style="box-shadow: none;">
-                        <div class="goal-header">
-                            <h3>Resultado: {{ result.name }}</h3>
-                            <span class="badge {{ result.goal_type }}">
-                                {% if result.goal_type == 'time_based' %}Basado en Tiempo{% else %}Basado en
-                                Contribución{% endif %}
-                            </span>
-                        </div>
-                        <div class="goal-body">
-                            <div class="amounts">
-                                <span>U$D {{ "{:,.2f}".format(result.current_amount) }}</span>
-                                <span>de U$D {{ "{:,.2f}".format(result.target_amount) }}</span>
+                            {% block content %}
+                            <div class="header-section">
+                                <h1>Calculadora de Metas Financieras</h1>
+                                <p>Calcula cuánto necesitas ahorrar o cuánto tardarás en alcanzar tus sueños.</p>
                             </div>
 
-                            {% if result.interest_rate > 0 %}
-                            <div class="interest-rate"
-                                style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                                <span
-                                    style="background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">
-                                    Interés: {{ result.interest_rate }}%
-                                </span>
+                            <div class="form-container" style="margin-bottom: 2rem;">
+                                <form method="POST" id="goalForm">
+                                    <div class="form-group">
+                                        <label for="name">Nombre de la Meta</label>
+                                        <input type="text" id="name" name="name" required
+                                            placeholder="ej., Auto Nuevo, Casa Propia"
+                                            value="{{ result.name if result else '' }}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="target_amount">Monto Objetivo (U$D)</label>
+                                        <input type="number" step="0.01" id="target_amount" name="target_amount"
+                                            required value="{{ result.target_amount if result else '' }}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="current_amount">Ahorros Actuales (U$D)</label>
+                                        <input type="number" step="0.01" id="current_amount" name="current_amount"
+                                            value="{{ result.current_amount if result else '0' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="interest_rate">Tasa de Interés Anual (%)</label>
+                                        <input type="number" step="0.01" id="interest_rate" name="interest_rate"
+                                            value="{{ result.interest_rate if result else '0' }}" placeholder="ej. 5.0">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Tipo de Meta</label>
+                                        <div class="radio-group">
+                                            <label class="radio-label">
+                                                <input type="radio" name="goal_type" value="time_based" {% if not result
+                                                    or result.goal_type=='time_based' %}checked{% endif %}
+                                                    onchange="toggleFields()">
+                                                <span>Basado en Tiempo (Tengo una fecha límite)</span>
+                                            </label>
+                                            <label class="radio-label">
+                                                <input type="radio" name="goal_type" value="contribution_based" {% if
+                                                    result and
+                                                    value="{{ result.monthly_contribution if result and result.goal_type == 'contribution_based' else '' }}">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn-primary full-width">Calcular</button>
+                                </form>
+                            </div>
+
+                            {% if result %}
+                            <div id="resultModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close-button" onclick="closeModal()">&times;</span>
+                                    <div class="goal-card" style="box-shadow: none;">
+                                        <div class="goal-header">
+                                            <h3>Resultado: {{ result.name }}</h3>
+                                            <span class="badge {{ result.goal_type }}">
+                                                {% if result.goal_type == 'time_based' %}Basado en Tiempo{% else
+                                                %}Basado en
+                                                Contribución{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="goal-body">
+                                            <div class="amounts">
+                                                <span>U$D {{ "{:,.2f}".format(result.current_amount) }}</span>
+                                                <span>de U$D {{ "{:,.2f}".format(result.target_amount) }}</span>
+                                            </div>
+
+                                            {% if result.interest_rate > 0 %}
+                                            <div class="interest-rate"
+                                                style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                                <span
+                                                    style="background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px;">
+                                                    Interés: {{ result.interest_rate }}%
+                                                </span>
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="details">
+                                                {% if result.goal_type == 'time_based' %}
+                                                <p>Fecha Objetivo: {{ result.target_date }}</p>
+                                                <p class="highlight" style="font-size: 1.2rem;">Contribución Mensual
+                                                    Necesaria:
+                                                    <br><strong>U$D {{
+                                                        "{:,.2f}".format(result.monthly_contribution) }}</strong>
+                                                </p>
+                                                {% else %}
+                                                <p>Contribución Mensual: U$D {{
+                                                    "{:,.2f}".format(result.monthly_contribution) }}</p>
+                                                <p class="highlight" style="font-size: 1.2rem;">Fecha Estimada de
+                                                    Finalización:
+                                                    <br><strong>{{
+                                                        result.target_date }}</strong>
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             {% endif %}
 
-                            <div class="details">
-                                {% if result.goal_type == 'time_based' %}
-                                <p>Fecha Objetivo: {{ result.target_date }}</p>
-                                <p class="highlight" style="font-size: 1.2rem;">Contribución Mensual Necesaria:
-                                    <br><strong>U$D {{
-                                        "{:,.2f}".format(result.monthly_contribution) }}</strong></p>
-                                {% else %}
-                                <p>Contribución Mensual: U$D {{ "{:,.2f}".format(result.monthly_contribution) }}</p>
-                                <p class="highlight" style="font-size: 1.2rem;">Fecha Estimada de Finalización:
-                                    <br><strong>{{
-                                        result.target_date }}</strong></p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+                            <script>
+                                function toggleFields() {
+                                    const type = document.querySelector('input[name="goal_type"]:checked').value;
+                                    const timeFields = document.getElementById('time_based_fields');
+                                    const contribFields = document.getElementById('contribution_based_fields');
+                                    const monthlyInput = document.getElementById('monthly_contribution');
 
-            <script>
-                function toggleFields() {
-                    const type = document.querySelector('input[name="goal_type"]:checked').value;
-                    const timeFields = document.getElementById('time_based_fields');
-                    const contribFields = document.getElementById('contribution_based_fields');
-                    const monthlyInput = document.getElementById('monthly_contribution');
+                                    if (type === 'time_based') {
+                                        timeFields.style.display = 'block';
+                                        contribFields.style.display = 'none';
+                                        monthlyInput.required = false;
+                                        toggleTimeInputs(); // Update sub-fields
+                                    } else {
+                                        timeFields.style.display = 'none';
+                                        contribFields.style.display = 'block';
+                                        monthlyInput.required = true;
+                                        // Disable time inputs requirements
+                                        document.getElementById('target_date').required = false;
+                                        document.getElementById('duration_years').required = false;
+                                        document.getElementById('duration_months').required = false;
+                                    }
+                                }
 
-                    if (type === 'time_based') {
-                        timeFields.style.display = 'block';
-                        contribFields.style.display = 'none';
-                        monthlyInput.required = false;
-                        toggleTimeInputs(); // Update sub-fields
-                    } else {
-                        timeFields.style.display = 'none';
-                        contribFields.style.display = 'block';
-                        monthlyInput.required = true;
-                        // Disable time inputs requirements
-                        document.getElementById('target_date').required = false;
-                        document.getElementById('duration_years').required = false;
-                        document.getElementById('duration_months').required = false;
-                    }
-                }
+                                function toggleTimeInputs() {
+                                    const timeType = document.querySelector('input[name="time_input_type"]:checked').value;
+                                    const dateWrapper = document.getElementById('date_input_wrapper');
+                                    const durationWrapper = document.getElementById('duration_input_wrapper');
+                                    const targetDateInput = document.getElementById('target_date');
+                                    const yearsInput = document.getElementById('duration_years');
+                                    const monthsInput = document.getElementById('duration_months');
 
-                function toggleTimeInputs() {
-                    const timeType = document.querySelector('input[name="time_input_type"]:checked').value;
-                    const dateWrapper = document.getElementById('date_input_wrapper');
-                    const durationWrapper = document.getElementById('duration_input_wrapper');
-                    const targetDateInput = document.getElementById('target_date');
-                    const yearsInput = document.getElementById('duration_years');
-                    const monthsInput = document.getElementById('duration_months');
+                                    // Only enforce requirements if the parent "time_based" is active
+                                    const parentType = document.querySelector('input[name="goal_type"]:checked').value;
+                                    const isTimeBased = parentType === 'time_based';
 
-                    // Only enforce requirements if the parent "time_based" is active
-                    const parentType = document.querySelector('input[name="goal_type"]:checked').value;
-                    const isTimeBased = parentType === 'time_based';
+                                    if (timeType === 'date') {
+                                        dateWrapper.style.display = 'block';
+                                        durationWrapper.style.display = 'none';
+                                        if (isTimeBased) {
+                                            targetDateInput.required = true;
+                                            yearsInput.required = false;
+                                            monthsInput.required = false;
+                                        }
+                                    } else {
+                                        dateWrapper.style.display = 'none';
+                                        durationWrapper.style.display = 'block';
+                                        if (isTimeBased) {
+                                            targetDateInput.required = false;
+                                            // At least one of years or months should be required in a real validation, 
+                                            // but for HTML5 required attribute, it's tricky. 
+                                            // Let's just require years for simplicity or handle in backend.
+                                            // For now, let's not force 'required' on them to avoid blocking if user puts 0 years 6 months.
+                                        }
+                                    }
+                                }
 
-                    if (timeType === 'date') {
-                        dateWrapper.style.display = 'block';
-                        durationWrapper.style.display = 'none';
-                        if (isTimeBased) {
-                            targetDateInput.required = true;
-                            yearsInput.required = false;
-                            monthsInput.required = false;
-                        }
-                    } else {
-                        dateWrapper.style.display = 'none';
-                        durationWrapper.style.display = 'block';
-                        if (isTimeBased) {
-                            targetDateInput.required = false;
-                            // At least one of years or months should be required in a real validation, 
-                            // but for HTML5 required attribute, it's tricky. 
-                            // Let's just require years for simplicity or handle in backend.
-                            // For now, let's not force 'required' on them to avoid blocking if user puts 0 years 6 months.
-                        }
-                    }
-                }
+                                function closeModal() {
+                                    document.getElementById('resultModal').style.display = 'none';
+                                }
 
-                function closeModal() {
-                    document.getElementById('resultModal').style.display = 'none';
-                }
+                                // Close modal when clicking outside
+                                window.onclick = function (event) {
+                                    var modal = document.getElementById('resultModal');
+                                    if (event.target == modal) {
+                                        modal.style.display = "none";
+                                    }
+                                }
 
-                // Close modal when clicking outside
-                window.onclick = function (event) {
-                    var modal = document.getElementById('resultModal');
-                    if (event.target == modal) {
-                        modal.style.display = "none";
-                    }
-                }
-
-                // Run on load to set correct state
-                document.addEventListener('DOMContentLoaded', () => {
-                    toggleFields();
-                    // toggleTimeInputs is called by toggleFields if needed
-                });
-            </script>
-            {% endblock %}
+                                // Run on load to set correct state
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    toggleFields();
+                                    // toggleTimeInputs is called by toggleFields if needed
+                                });
+                            </script>
+                            {% endblock %}
