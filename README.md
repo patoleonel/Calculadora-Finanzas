@@ -1,54 +1,63 @@
-# Financial Goals App
+# Calculadora de Metas Financieras
 
-Una aplicación web simple para rastrear tus objetivos financieros, construida con Flask.
+Una aplicación web construida con Flask que ayuda a los usuarios a planificar sus objetivos financieros. Permite calcular cuánto ahorrar mensualmente para llegar a una meta en una fecha específica, o estimar cuándo se alcanzará una meta dada una contribución mensual fija.
 
 ## Características
 
-- Crear objetivos basados en tiempo (fecha objetivo) o contribución mensual.
-- Visualizar el progreso con barras de progreso.
-- Cálculo automático de contribuciones mensuales o fechas estimadas.
+-   **Meta basada en Tiempo**: Calcula la contribución mensual necesaria para alcanzar un monto objetivo en una fecha determinada.
+-   **Meta basada en Contribución**: Estima la fecha en la que se alcanzará el objetivo dado un ahorro mensual fijo.
+-   **Cálculo de Interés Compuesto**: Considera una tasa de interés anual para proyecciones más realistas.
+-   **Interfaz Intuitiva**: Diseño limpio y fácil de usar.
+
+## Tecnologías
+
+-   Python 3.x
+-   Flask
+-   HTML5 / CSS3
 
 ## Instalación Local
 
-1.  Clonar el repositorio:
+Sigue estos pasos para ejecutar la aplicación en tu computadora:
+
+1.  **Clonar el repositorio**
     ```bash
     git clone <tu-repo-url>
-    cd financial_goals_app
+    cd Calculadora-Finanzas
     ```
 
-2.  Crear un entorno virtual e instalar dependencias:
+2.  **Crear un entorno virtual**
     ```bash
+    # Windows
     python -m venv venv
-    # En Windows:
     venv\Scripts\activate
-    # En macOS/Linux:
+
+    # macOS/Linux
+    python3 -m venv venv
     source venv/bin/activate
-    
+    ```
+
+3.  **Instalar dependencias**
+    ```bash
     pip install -r requirements.txt
     ```
 
-3.  Ejecutar la aplicación:
+4.  **Ejecutar la aplicación**
     ```bash
     python app.py
     ```
 
-4.  Abrir en el navegador: `http://127.0.0.1:5000`
+5.  **Abrir en el navegador**
+    Ve a [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ## Despliegue
 
-Esta aplicación está lista para ser desplegada en plataformas como Render, Railway o Heroku.
+Esta aplicación está configurada para ser desplegada fácilmente en **Vercel**.
 
-### Render / Railway
-
-1.  Conecta tu repositorio de GitHub.
-2.  El servicio detectará automáticamente el archivo `Procfile` y `requirements.txt`.
-3.  **Configuración de Variables de Entorno**:
-    - `SECRET_KEY`: Una cadena aleatoria segura.
-    - `DATABASE_URL`: La URL de tu base de datos PostgreSQL (proporcionada por el servicio de hosting).
+-   El archivo `vercel.json` contiene la configuración necesaria.
+-   El archivo `requirements.txt` lista las dependencias necesarias.
 
 ## Estructura del Proyecto
 
-- `app.py`: Aplicación principal Flask.
-- `models.py`: Modelos de base de datos SQLAlchemy.
-- `templates/`: Plantillas HTML.
-- `static/`: Archivos estáticos (CSS).
+-   `app.py`: Contiene la lógica del servidor Flask y los cálculos financieros.
+-   `templates/`: Contiene los archivos HTML (Jinja2).
+-   `static/`: Contiene los archivos CSS y recursos estáticos.
